@@ -1,36 +1,68 @@
 #include <HCSR04.h>
+#include "QuickMedianLib.h"
 
-// Initialize sensor that uses digital pins 13 and 12.
+// Initialize sensor that uses digital pins
 const int triggerPin = 7;
 const int echoPin = 8;
 UltraSonicDistanceSensor distanceSensor(triggerPin, echoPin);
 
-float distance;
-float fillLevel;
-float mountingHeight = 130;
-int echoCount = 10;
+const float mountingHeight = 130;   //in cm
+const int echoCount = 10;           //how often measurement will be taken before going back to sleep
+float distanceVals[echoCount];
+float distance;                     //in cm
+float fillLevel;                    //in percent
 
 void setup () {
-    Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor.
+ Serial.begin(9600);  // We initialize serial connection so that we could print values from sensor
+
 }
 
 void loop () {
-    // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters.
+    // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters
         
-            distance = distanceSensor.measureDistanceCm();
-
+        //get array of multiple distance-levels to calc median afterwards, prune out false readings 
+        getDistanceVals(echoCount);
         
-                
+        //calculate Median of distancevals
+        int dValsLength = sizeof(distanceVals) / sizeof(distanceVals[0]); 
+        
+        distance = QuickMedian<float>::GetMedian(distanceVals, dValsLength);                
+        Serial.print("MEDIAN: ");
+        Serial.println(distance);
 
+        //calculate fill-percentage depending on mounting-height of sensor (!)
         fillLevel = getPercentage(distance, mountingHeight);
-        Serial.print("%: ");
-        Serial.println(fillLevel);
+        printLevel(fillLevel);
+
+
+        delay(5000); //TODO: Replace with deep sleep
 }
 
-//calculate fill-percentage depending on mounting-height of sensor (!)
 float getPercentage(float distance, float mountingHeight){
-    float d = distance;
-    float m = mountingHeight;
-    float fillHeight = m-d;
-    return (fillHeight/m*100);
+    float fillHeight = (mountingHeight-distance);
+    return (fillHeight/mountingHeight*100);
+}
+
+void getDistanceVals(int echoCount){
+    float distance;
+    // float distanceVals[echoCount];
+    for (int i = 0; i < echoCount;){
+        distance = distanceSensor.measureDistanceCm();
+        if (distance != -1){
+            distanceVals[i] = distance;
+            Serial.println(distance);
+            i++;
+        }
+        delay(500); //x echoCount amounts to 5s
+    }
+}
+
+void printLevel(float fillLevel){
+    if (fillLevel <= 0 || fillLevel > 100){
+        Serial.print("ERROR!");
+        return;
+    }
+
+    Serial.print("%: ");
+    Serial.println(fillLevel);
 }
