@@ -1,0 +1,17 @@
+FÜR TTGO LORA
+
+Boards Manager -> 	"esp32" von espressif
+Libraries -> 		"ssd1306" von Adafruit
+					"gfx" von Adafruit
+					"LoRa" von Sandeep Mistry
+
+
+
+
+Benutzte Links:
+https://randomnerdtutorials.com/ttgo-lora32-sx1276-arduino-ide/ 
+
+FÜR TTGO GSM
+
+Boards Manager ->	"esp32" von espressif
+Libraries ->		"TinyGSM"
