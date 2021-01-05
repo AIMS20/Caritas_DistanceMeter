@@ -10,14 +10,14 @@
 */
 
 // Your GPRS credentials (leave empty, if not needed)
-const char apn[]      = ""; // APN (example: internet.vodafone.pt) use https://wiki.apnchanger.org
+const char apn[]      = "webaut"; // APN (example: internet.vodafone.pt) use https://wiki.apnchanger.org
 const char gprsUser[] = ""; // GPRS User
 const char gprsPass[] = ""; // GPRS Password
 
 // SIM card PIN (leave empty, if not defined)
-const char simPIN[]   = ""; 
+const char simPIN[]   = "7928";  //TODO: Remove //FOR TESTING PURPOSES, WILL NOT WORK IN PRODUCTION ENVIRONMENT
 
-// Server details
+// Server details //TODO: Add Blynk credentials
 // The server variable can be just a domain name or it can have a subdomain. It depends on the service you are using
 const char server[] = "example.com"; // domain name: example.com, maker.ifttt.com, etc
 const char resource[] = "/post-data.php";         // resource path, for example: /post-data.php
@@ -25,7 +25,7 @@ const int  port = 80;                             // server port number
 
 // Keep this API Key value to be compatible with the PHP code provided in the project page. 
 // If you change the apiKeyValue value, the PHP file /post-data.php also needs to have the same key 
-String apiKeyValue = "tPmAT5Ab3j7F9";
+String apiKeyValue = ""; //TODO: Add API key, read from textfile?
 
 // TTGO T-Call pins
 #define MODEM_RST            5
@@ -35,7 +35,7 @@ String apiKeyValue = "tPmAT5Ab3j7F9";
 #define MODEM_RX             26
 #define I2C_SDA              21
 #define I2C_SCL              22
-// BME280 pins
+// SR04 pins
 #define I2C_SDA_2            18
 #define I2C_SCL_2            19
 
@@ -51,7 +51,7 @@ String apiKeyValue = "tPmAT5Ab3j7F9";
 // Define the serial console for debug prints, if needed
 //#define DUMP_AT_COMMANDS
 
-#include <Wire.h>
+#include <Wire.h> //For communication with I2C devices
 #include <TinyGsmClient.h>
 
 #ifdef DUMP_AT_COMMANDS
@@ -63,20 +63,20 @@ String apiKeyValue = "tPmAT5Ab3j7F9";
 #endif
 
 #include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
+#include <Adafruit_BME280.h> //TODO: Include SR04 library
 
 // I2C for SIM800 (to keep it running when powered from battery)
 TwoWire I2CPower = TwoWire(0);
 
 // I2C for BME280 sensor
-TwoWire I2CBME = TwoWire(1);
+TwoWire I2CBME = TwoWire(1); //TODO: Rewrite for SR04
 Adafruit_BME280 bme; 
 
 // TinyGSM Client for Internet connection
 TinyGsmClient client(modem);
 
 #define uS_TO_S_FACTOR 1000000     /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  3600        /* Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour */
+#define TIME_TO_SLEEP  30        /* Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour */
 
 #define IP5306_ADDR          0x75
 #define IP5306_REG_SYS_CTL0  0x00
@@ -92,7 +92,7 @@ bool setPowerBoostKeepOn(int en){
   return I2CPower.endTransmission() == 0;
 }
 
-void setup() {
+void setup() {  //TODO: Rewrite for SR04
   // Set serial monitor debugging window baud rate to 115200
   SerialMon.begin(115200);
 
@@ -119,8 +119,8 @@ void setup() {
   // Restart SIM800 module, it takes quite some time
   // To skip it, call init() instead of restart()
   SerialMon.println("Initializing modem...");
-  modem.restart();
-  // use modem.init() if you don't need the complete restart
+  // modem.restart();
+   modem.init(); //if you don't need the complete restart
 
   // Unlock your SIM card with a PIN if needed
   if (strlen(simPIN) && modem.getSimStatus() != 3 ) {
@@ -156,7 +156,7 @@ void loop() {
     
       // Making an HTTP POST request
       SerialMon.println("Performing HTTP POST request...");
-      // Prepare your HTTP POST request data (Temperature in Celsius degrees)
+      // Prepare your HTTP POST request data (Temperature in Celsius degrees) //TODO: Rewrite for SR04, depending on Blynk
       String httpRequestData = "api_key=" + apiKeyValue + "&value1=" + String(bme.readTemperature())
                              + "&value2=" + String(bme.readHumidity()) + "&value3=" + String(bme.readPressure()/100.0F) + "";
       // Prepare your HTTP POST request data (Temperature in Fahrenheit degrees)
@@ -178,7 +178,7 @@ void loop() {
 
       unsigned long timeout = millis();
       while (client.connected() && millis() - timeout < 10000L) {
-        // Print available data (HTTP response from server)
+        // Print available data (HTTP response from server) //TODO: Rewrite for SR04; if answer >> go to sleep
         while (client.available()) {
           char c = client.read();
           SerialMon.print(c);
