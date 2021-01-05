@@ -63,7 +63,7 @@ String apiKeyValue = ""; //TODO: Add API key, read from textfile?
 #endif
 
 #include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h> //TODO: Include SR04 library
+#include <Adafruit_BME280.h> //TODO: Include SR04 library, Blynk library
 
 // I2C for SIM800 (to keep it running when powered from battery)
 TwoWire I2CPower = TwoWire(0);
