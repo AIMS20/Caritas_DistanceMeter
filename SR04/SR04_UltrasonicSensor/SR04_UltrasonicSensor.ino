@@ -20,7 +20,7 @@ void setup () {
 void loop () {
     // Every 500 miliseconds, do a measurement using the sensor and print the distance in centimeters
         
-        //get array of multiple distance-levels to calc median afterwards, prune out false readings 
+        //get array of multiple distance-levels to calc median afterwards: prunes out false readings 
         getDistanceVals(echoCount);
         
         //calculate Median of distancevals
@@ -47,7 +47,7 @@ void getDistanceVals(int echoCount){
     float distance;
     // float distanceVals[echoCount];
     for (int i = 0; i < echoCount;){
-        distance = distanceSensor.measureDistanceCm();
+        distance = distanceSensor.measureDistanceCm(); //TODO: What to output when not reading e.g. distance too small?
         if (distance != -1){
             distanceVals[i] = distance;
             Serial.println(distance);
