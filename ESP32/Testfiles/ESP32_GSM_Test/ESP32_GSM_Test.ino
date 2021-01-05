@@ -36,8 +36,8 @@ String apiKeyValue = ""; //TODO: Add API key, read from textfile?
 #define I2C_SDA              21
 #define I2C_SCL              22
 // SR04 pins
-#define I2C_SDA_2            18
-#define I2C_SCL_2            19
+#define I2C_SDA_2            18 //Data OUT
+#define I2C_SCL_2            19 //Data IN
 
 // Set serial for debug console (to Serial Monitor, default speed 115200)
 #define SerialMon Serial
