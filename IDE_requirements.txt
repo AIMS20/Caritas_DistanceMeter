@@ -14,4 +14,6 @@ https://randomnerdtutorials.com/ttgo-lora32-sx1276-arduino-ide/
 FÜR TTGO GSM
 
 Boards Manager ->	"esp32" von espressif
-Libraries ->		"TinyGSM"
+Libraries ->		"TinyGSM" von vshymanskyy
+					"blynkkk" von vshymanskyy
+					"Wire" von Arduino
