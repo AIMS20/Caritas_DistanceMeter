@@ -17,3 +17,9 @@ Boards Manager ->	"esp32" von espressif
 Libraries ->		"TinyGSM" von vshymanskyy
 					"blynkkk" von vshymanskyy
 					"Wire" von Arduino
+					"QuickMedianLib" von Luis LLamas
+
+
+
+Benützte Links:
+https://randomnerdtutorials.com/esp32-sim800l-publish-data-to-cloud/
