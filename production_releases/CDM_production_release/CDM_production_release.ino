@@ -58,7 +58,7 @@ UltraSonicDistanceSensor distanceSensor(SR04_triggerpin, SR04_echopin);
 
 
 // Vars of container and sensor
-const float mountingHeight = 130;   //in cm
+const float mountingHeight = 130;   //in cm //TODO: Adjust after exact measuring
 const int echoCount = 20;           //how often measurement will be taken before going back to sleep
 const int pauseMeasurement = 1000;  //in miliseconds
 float distanceVals[echoCount];      //in cm
