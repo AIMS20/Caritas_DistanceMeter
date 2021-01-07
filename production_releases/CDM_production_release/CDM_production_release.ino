@@ -218,7 +218,7 @@ void printLevel(float fillLevel){
 
 void sendData(float fillLevel){
   Blynk.virtualWrite(V5, fillLevel);
-  Serial.println("Sent ");
-  Serial.println(fillLevel);
-  Serial.println(" to Blynk!");
+  Serial.print("Sent ");
+  Serial.print(fillLevel);
+  Serial.print(" to Blynk!");
 }
