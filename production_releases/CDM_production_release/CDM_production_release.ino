@@ -28,12 +28,10 @@ String apiKeyValue = ""; //TODO: Add API key, read from textfile?
 #define MODEM_RX             26
 #define I2C_SDA              21
 #define I2C_SCL              22
-// #define I2C_SDA_2            18 //Data OUT
-// #define I2C_SCL_2            19 //Data IN
 
 // SR04 pins
-const int I2C_SR04_triggerpin = 18;
-const int I2C_SR04_echopin = 19;
+const int SR04_triggerpin = 18; // MISO pin
+const int SR04_echopin = 19;    // SCL pin
 
 // Set serial for debug console (to Serial Monitor, default speed 115200)
 #define SerialMon Serial
@@ -49,7 +47,9 @@ const int I2C_SR04_echopin = 19;
 
 #include <Wire.h> //For communication with I2C devices
 #include <TinyGsmClient.h>
-#include <Adafruit_Sensor.h>
+#include <Adafruit_Sensor.h> //TODO: needed?
+#include <HCSR04.h>
+#include "QuickMedianLib.h" //TODO: include Blynk library
 
 #ifdef DUMP_AT_COMMANDS
   #include <StreamDebugger.h>
@@ -59,22 +59,18 @@ const int I2C_SR04_echopin = 19;
   TinyGsm modem(SerialAT);
 #endif
 
-#include <HCSR04.h>
-#include "QuickMedianLib.h" //TODO: include Blynk library
 
 // I2C for SIM800 (to keep it running when powered from battery) //TODO: Research if necessary
 TwoWire I2CPower = TwoWire(0);
 
-// I2C for SR04 sensor
-TwoWire I2CSR04 = TwoWire(1); //TODO: Test for SR04
 
-UltraSonicDistanceSensor distanceSensor(I2C_SR04_triggerpin, I2C_SR04_echopin);
+UltraSonicDistanceSensor distanceSensor(SR04_triggerpin, SR04_echopin);
 
 // Vars of container and sensor
 const float mountingHeight = 130;   //in cm
 const int echoCount = 10;           //how often measurement will be taken before going back to sleep
-const int pauseMeasurement = 500;    //in miliseconds //TODO: Adjust so baudrate 115200 will work
-float distanceVals[echoCount];
+const int pauseMeasurement = 500;    //in miliseconds
+float distanceVals[echoCount];      //in cm
 float distance;                     //in cm
 float fillLevel;                    //in percent
 
@@ -96,11 +92,10 @@ void setup() {  //TODO: Rewrite for SR04
 
   // Start I2C communication
   I2CPower.begin(I2C_SDA, I2C_SCL, 400000);
-  I2CSR04.begin(I2C_SR04_triggerpin, I2C_SR04_echopin, 400000);
   
   // Set SR04 pins
-  pinMode(I2C_SR04_triggerpin, OUTPUT);
-  pinMode(I2C_SR04_echopin, INPUT);
+  pinMode(SR04_triggerpin, OUTPUT);
+  pinMode(SR04_echopin, INPUT);
 
   // Keep power when running from battery
   bool isOk = setPowerBoostKeepOn(1);
@@ -134,26 +129,27 @@ void setup() {  //TODO: Rewrite for SR04
 
   Serial.println("ENDREGION Modem...");
   
-  // You might need to change the BME280 I2C address, in our case it's 0x76
-  if (!sr04.begin(0x76, &I2CSR04)) { //TODO: check for connection in another way
-    Serial.println("Could not find a valid SR04 sensor, check wiring!");
-    while (1);
-  }
+  // // You might need to change the BME280 I2C address, in our case it's 0x76
+  // if (!sr04.begin(0x76, &I2CSR04)) { //TODO: check for connection in another way... distanceVals ==0?
+  //   Serial.println("Could not find a valid SR04 sensor, check wiring!");
+  //   while (1);
+  // }
 
   // Configure the wake up source as timer wake up  
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
 }
 
+// Every x miliseconds, do a measurement using the sensor and print the distance in centimeters
+// TODO: Send measurements via GSM to Blynk-server
 void loop() {
   Serial.println("Starting loop...");
-    // Every x miliseconds, do a measurement using the sensor and print the distance in centimeters
 	#pragma region SENSOR
+
 	//get array of multiple distance-levels to calc median afterwards: prunes out false readings 
 	getDistanceVals(echoCount, pauseMeasurement);
 
-	//calculate Median of distancevals
+	//calculate median of distancevals
 	int dValsLength = sizeof(distanceVals) / sizeof(distanceVals[0]); 
-	
 	distance = QuickMedian<float>::GetMedian(distanceVals, dValsLength);                
 	Serial.print("MEDIAN: ");
 	Serial.println(distance);
@@ -247,7 +243,6 @@ void getDistanceVals(int echoCount, int pauseMeasurement){
     float distance;
     for (int i = 0; i < echoCount;){
         distance = distanceSensor.measureDistanceCm(); //TODO: What to output when not reading e.g. distance too small?
-        delay(500);
         if (distance != -1){
             distanceVals[i] = distance;
             Serial.println(distance);
@@ -262,7 +257,7 @@ void getDistanceVals(int echoCount, int pauseMeasurement){
 
 void printLevel(float fillLevel){
     if (fillLevel <= 0 || fillLevel > 100){
-        Serial.print("ERROR!");
+        Serial.print("ERROR! percent value too big/small");
         return;
     }
 
