@@ -69,7 +69,9 @@ UltraSonicDistanceSensor distanceSensor(SR04_triggerpin, SR04_echopin);
 
 // Disables connection attempts & Blynk
 bool keepOffline = false;
+bool isInitialized;
 bool isConnected;
+bool blynkConnected;
 
 // Vars of container and sensor
 const float mountingHeight = 114;   //in cm //TODO: Adjust after exact measuring in MIDDLE of Container
@@ -125,34 +127,45 @@ void setup() {
     SerialMon.println("Unlocked SIM!");
   }
 
-
   // Restart SIM800 module, it takes quite some time
   // To skip it, call init() instead of restart() //TODO: Test if init() is enough after optimized (!) deepsleep
-  // modem.restart();
-  SerialMon.println("Initializing modem...");
-  modem.init();
-  SerialMon.println("Modem initialized!");
+  // modem.restart();´
 
+  // Try to connect
   if (!keepOffline){
+    SerialMon.println("Initializing modem...");
+    isInitialized = modem.init();
+    SerialMon.println("Modem initialized!");
+    isConnected = modem.gprsConnect(apn, gprsUser, gprsPass);
 
-    SerialMon.println("Starting up Blynk...");
-    Blynk.begin(auth, modem, apn, gprsUser, gprsPass);
-
-    delay(30000);
-    SerialMon.println("Testing connection...");
-    // initialize modem, if not possible after n tries: back to deepsleep
-    isConnected = testModemConnection(modem, connectionRetries);
-    delay(2500);
-    if (!Blynk.connected())
-    {
-      SerialMon.println("Couldn't connect to Blynk. Going back to sleep...");
-      TIME_TO_SLEEP /= 2;
-      esp_deep_sleep_start();
+    // Test GPRS modem connection, if not possible after n tries: back to deepsleep
+    if (isConnected == 0){
+      SerialMon.println("Testing connection...");
+      if(!testModemConnection(modem, connectionRetries, apn, gprsUser, gprsPass)){
+        SerialMon.println("Can't connect to GPRS. Back to deepsleep.");
+        TIME_TO_SLEEP /= 2;
+        esp_deep_sleep_start();
+      }
     }
+    else { // If GPRS connection successful, test for Blynk connection, if not possible: deepsleep
+      SerialMon.println("Connecting to Blynk...");
+      Blynk.config(modem, auth);
+      blynkConnected = Blynk.connect(15000); // Timeout in ms
 
+      // If Blynk connection successful, begin. If not: deepsleep
+      if (blynkConnected == 1){
+        SerialMon.println("Connected to Blynk!");
+        SerialMon.println("Starting up Blynk...");
+        Blynk.begin(auth, modem, apn, gprsUser, gprsPass);
+      }
+      else{
+        SerialMon.println("Can't connect to Blynk. Back to deepsleep.");
+        TIME_TO_SLEEP /= 2;
+        esp_deep_sleep_start();
+      }
+    }
   }
 
-  
   battPercent = modem.getBattPercent();
   battVolt = modem.getBattVoltage();
 
@@ -263,7 +276,7 @@ void sendData(int data, int VPin){
 
 // Test modems connection to GPRS with n retries, restart modem,
 // go back to deepsleep if no connection can be established
-bool testModemConnection(TinyGsm modem, int connectionRetries){
+bool testModemConnection(TinyGsm modem, int connectionRetries, const char* apn, const char* gprsUser, const char* gprsPass){
   delay(500);
   if (!modem.isGprsConnected()){
     SerialMon.println("Modem couldn't connect...");
@@ -273,9 +286,9 @@ bool testModemConnection(TinyGsm modem, int connectionRetries){
       if (j%2 == 0){
         SerialMon.println("Restarting modem...");
         modem.restart();
-        delay(3000);
+        modem.gprsConnect(apn, gprsUser, gprsPass);
+        delay(5000);
       }
-      
       if (modem.isGprsConnected()){
         SerialMon.println("Modem connected!");
         return true;
