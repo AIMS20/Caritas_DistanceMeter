@@ -1,11 +1,9 @@
 
 /*
 //TODO: Create License file
-//TODO: Return Battery Status (!)
+//TODO: Test Return Battery Status with actual Battery (!)
 //TODO: Optimize measurements for minimal Error-readings
-//TODO: Round fillLevel to nearest mult of 5:
-                                            result = number + multiple/2;
-                                            result -= result % multiple;
+
 //TODO: disable WIFI, BT etc
 */
 
