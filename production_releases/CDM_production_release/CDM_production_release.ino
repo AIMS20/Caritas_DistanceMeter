@@ -36,7 +36,7 @@ const int SR04_echopin    = 19;   // SCL pin
 
 
 #define uS_TO_S_FACTOR 1000000  // Conversion factor for micro seconds to seconds 
-int TIME_TO_SLEEP = 120;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
+int TIME_TO_SLEEP = 3600;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
 
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
 #define BLYNK_DEBUG BlynkSerial // Optional, this enables more detailed prints
@@ -82,7 +82,7 @@ bool isConnected;
 bool blynkConnected;
 
 // Vars of container and sensor
-const float mountingHeight = 114;   //in cm //TODO: Adjust after exact measuring in MIDDLE of Container (in Maya)
+const float mountingHeight = 73;   //in cm //TODO: Adjust after exact measuring in MIDDLE of Container (in Maya)
 const int echoCount = 15;           //how often measurement will be taken before going back to sleep
 const int pauseMeasurement = 1000;  //in miliseconds
 float distanceVals[echoCount];      //in cm
@@ -256,6 +256,7 @@ void calcDistanceVals(int echoCount, int pauseMeasurement){
         SerialMon.println("CANNOT GET MEASUREMENT");
         errorCount++;
         if (errorCount > 10 ){  //TODO: THINK OF BETTER SOLUTION IN PRODUCTION
+          SerialMon.println("Going back to sleep...");
           TIME_TO_SLEEP /= 2;
           esp_deep_sleep_start();
         }
