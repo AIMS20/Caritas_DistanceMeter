@@ -34,9 +34,9 @@ char auth[] = "OIYHUu6ibNNhhu7l9bGg36XXuTbW0OAz";
 const int SR04_triggerpin = 18;   // MISO pin
 const int SR04_echopin    = 19;   // SCL pin
 
-
-#define uS_TO_S_FACTOR 1000000  // Conversion factor for micro seconds to seconds 
-int TIME_TO_SLEEP = 3600;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
+// Factors in UNSIGNED LONG (!)
+#define uS_TO_S_FACTOR 1000000UL  // Conversion factor for micro seconds to seconds 
+int TIME_TO_SLEEP = 3600UL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
 
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
 #define BLYNK_DEBUG BlynkSerial // Optional, this enables more detailed prints
@@ -56,6 +56,7 @@ int TIME_TO_SLEEP = 3600;        // Time ESP32 will go to sleep (in seconds) 360
 
 // Libraries
 // #include <Arduino.h>         // General, power management etc
+#include <esp_sleep.h>
 #include <WiFi.h>
 #include <esp_bt.h>             // For power management
 #include <esp_wifi.h>           // For power management
@@ -65,6 +66,7 @@ int TIME_TO_SLEEP = 3600;        // Time ESP32 will go to sleep (in seconds) 360
 #include <HCSR04.h>             // For ultrasonic sensor
 #include "QuickMedianLib.h"     // For median calc of SR04 values
 #include <BlynkSimpleSIM800.h>  // For Blynk-Server uploading
+
 
 
 // Create objects
@@ -84,7 +86,7 @@ bool blynkConnected;
 // Vars of container and sensor
 const float mountingHeight = 73;   //in cm //TODO: Adjust after exact measuring in MIDDLE of Container (in Maya)
 const int echoCount = 15;           //how often measurement will be taken before going back to sleep
-const int pauseMeasurement = 1000;  //in miliseconds
+const int pauseMeasurement = 300;  //in miliseconds
 float distanceVals[echoCount];      //in cm
 float distance;                     //in cm
 int fillLevel;                      //in percent
@@ -97,6 +99,8 @@ float battVolt;
 
 
 void setup() { 
+// Hibernate instead of deepsleep
+  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);  
 
   // Set serial monitor debugging window baud rate to 9600 (default 115200)
   SerialMon.begin(9600);
