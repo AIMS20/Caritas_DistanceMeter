@@ -206,6 +206,7 @@ void loop() {
     SerialMon.println("Sending values to Blynk...");
     sendData(fillLevel, 5);
     sendData(battPercent, 6);
+    sendData(battVolt, 7);
     delay(3000); // Otherwise disconnecting too fast and sending won't go through (!) //TODO: decrement
 
 
