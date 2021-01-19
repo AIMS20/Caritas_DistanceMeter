@@ -2,6 +2,9 @@
 /*
 //TODO: Test Return Battery Status with actual Battery (!)
 //TODO: Optimize measurements for minimal Error-readings
+//TODO: Power management by
+        -deactivating PINS
+        -...
 */
 
 // Your GPRS credentials (leave empty, if not needed)
