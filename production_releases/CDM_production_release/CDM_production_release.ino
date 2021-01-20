@@ -1,13 +1,12 @@
 
 /*
-//TODO: Test Return Battery Status with actual Battery (!)
 //TODO: Optimize measurements for minimal Error-readings
-//TODO: Power management by
+//TODO: Advanced Power management by
         -deactivating PINS
         -...
 */
 
-// Your GPRS credentials (leave empty, if not needed)
+// GPRS credentials (leave empty, if not needed)
                                   // APN (example: internet.vodafone.pt)
 const char apn[]      = "webaut"; // use https://web.archive.org/web/20180119161650/http://wiki.apnchanger.org/Austria#Hofer_.28Hot.29
 const char gprsUser[] = ""; // GPRS User
@@ -56,8 +55,8 @@ int TIME_TO_SLEEP = 3600UL;        // Time ESP32 will go to sleep (in seconds) 3
 
 // Libraries
 // #include <Arduino.h>         // General, power management etc
-#include <esp_sleep.h>
-#include <WiFi.h>
+#include <esp_sleep.h>          // For power management
+#include <WiFi.h>               // For power management
 #include <esp_bt.h>             // For power management
 #include <esp_wifi.h>           // For power management
 #include "driver/adc.h"         // For power management
