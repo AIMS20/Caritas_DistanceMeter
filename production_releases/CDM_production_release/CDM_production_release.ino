@@ -13,8 +13,7 @@ const char gprsUser[] = ""; // GPRS User
 const char gprsPass[] = ""; // GPRS Password
 
 // SIM card PIN (leave empty, if not defined)
-//TODO: Remove //FOR TESTING PURPOSES, WILL NOT WORK IN PRODUCTION ENVIRONMENT
-const char simPIN[]   = "7928"; 
+const char simPIN[]   = ""; 
 
 // Blynk Server details //TODO: Remove //FOR TESTING PURPOSES, WILL NOT WORK IN PRODUCTION ENVIRONMENT
 // "WIFI MAnager esp32" or EEPROM ()
