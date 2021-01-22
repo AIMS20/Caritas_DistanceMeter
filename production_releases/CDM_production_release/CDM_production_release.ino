@@ -39,7 +39,22 @@ int TIME_TO_SLEEP = 3600UL;        // Time ESP32 will go to sleep (in seconds) 3
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
 #define BLYNK_DEBUG BlynkSerial // Optional, this enables more detailed prints
 // Set serial for debug console (to Serial Monitor, default speed 115200)
-#define SerialMon Serial
+
+//UNCOMMENT FOR DEBUG PRINTS
+// #define SERIAL_DEBUG Serial
+
+// #define SerialMon Serial
+
+#ifdef SERIAL_DEBUG
+  #define DEBUG_PRINT(x) Serial.print(x)
+  #define DEBUG_PRINTDEC(x) Serial.print(x)
+  #define DEBUG_PRINTLN(x) Serial.println(x)
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTDEC(x)
+  #define DEBUG_PRINTLN(x)
+#endif
+
 // Set serial for AT commands (to SIM800 module)
 #define SerialAT Serial1
 
@@ -101,8 +116,8 @@ void setup() {
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);  
 
   // Set serial monitor debugging window baud rate to 9600 (default 115200)
-  SerialMon.begin(9600);
-  Serial.println("Starting up...");
+  Serial.begin(9600);
+  DEBUG_PRINTLN("Starting up...");
 
   // For power saving:
   WiFi.disconnect();            //disable Wifi
@@ -119,7 +134,7 @@ void setup() {
 
   // Keep power when running from battery //TODO: check if deepsleep reboot on battery works without this
   bool isOk = setPowerBoostKeepOn(1);
-  SerialMon.println(String("IP5306 KeepOn ") + (isOk ? "OK" : "FAIL")); 
+  DEBUG_PRINTLN(String("IP5306 KeepOn ") + (isOk ? "OK" : "FAIL")); 
 
   // Configure the wake up source as timer wake up  
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
@@ -138,38 +153,38 @@ void setup() {
   // Unlock your SIM card with a PIN if needed
   if (strlen(simPIN) && modem.getSimStatus() != 3 ) {
     modem.simUnlock(simPIN);
-    SerialMon.println("Unlocked SIM!");
+    DEBUG_PRINTLN("Unlocked SIM!");
   }
 
   // Try to connect
   if (!keepOffline){
-    SerialMon.println("Initializing modem...");
+    DEBUG_PRINTLN("Initializing modem...");
     isInitialized = modem.init();
-    SerialMon.println("Modem initialized!");
+    DEBUG_PRINTLN("Modem initialized!");
     isConnected = modem.gprsConnect(apn, gprsUser, gprsPass);
 
     // Test GPRS modem connection, if not possible after n tries: back to deepsleep
     if (isConnected == 0){
-      SerialMon.println("Testing connection...");
+      DEBUG_PRINTLN("Testing connection...");
       if(!testModemConnection(modem, connectionRetries, apn, gprsUser, gprsPass)){
-        SerialMon.println("Can't connect to GPRS. Back to deepsleep.");
+        DEBUG_PRINTLN("Can't connect to GPRS. Back to deepsleep.");
         TIME_TO_SLEEP /= 2;
         esp_deep_sleep_start();
       }
     }
     else { // If GPRS connection successful, test for Blynk connection, if not possible: deepsleep
-      SerialMon.println("Connecting to Blynk...");
+      DEBUG_PRINTLN("Connecting to Blynk...");
       Blynk.config(modem, auth);
       blynkConnected = Blynk.connect(15000); // Timeout in ms
 
       // If Blynk connection successful, begin. If not: deepsleep
       if (blynkConnected == 1){
-        SerialMon.println("Connected to Blynk!");
-        SerialMon.println("Starting up Blynk...");
+        DEBUG_PRINTLN("Connected to Blynk!");
+        DEBUG_PRINTLN("Starting up Blynk...");
         Blynk.begin(auth, modem, apn, gprsUser, gprsPass);
       }
       else{
-        SerialMon.println("Can't connect to Blynk. Back to deepsleep.");
+        DEBUG_PRINTLN("Can't connect to Blynk. Back to deepsleep.");
         TIME_TO_SLEEP /= 2;
         esp_deep_sleep_start();
       }
@@ -179,17 +194,17 @@ void setup() {
   battPercent = modem.getBattPercent();
   battVolt = modem.getBattVoltage();
 
-  SerialMon.println("Battery %: ");
-  SerialMon.println(battPercent);
-  SerialMon.println("Battery V: ");
-  SerialMon.println(battVolt);
+  DEBUG_PRINTLN("Battery %: ");
+  DEBUG_PRINTLN(battPercent);
+  DEBUG_PRINTLN("Battery V: ");
+  DEBUG_PRINTLN(battVolt);
 
 }
 
 // Every n miliseconds, do a measurement using the sensor,
 // print the distance in centimeters and send the fillLevel
 void loop() {
-  SerialMon.println("Starting loop...");
+  DEBUG_PRINTLN("Starting loop...");
 
   //get array of multiple distance-levels to calc median afterwards: prunes out false readings 
   calcDistanceVals(echoCount, pauseMeasurement);
@@ -202,22 +217,22 @@ void loop() {
   printLevel(fillLevel);
     
   if ((!keepOffline) && Blynk.connected()){
-    SerialMon.println("Blynk connected...");
+    DEBUG_PRINTLN("Blynk connected...");
     Blynk.run();
 
-    SerialMon.println("Sending values to Blynk...");
+    DEBUG_PRINTLN("Sending values to Blynk...");
     sendData(fillLevel, 5);
     sendData(battPercent, 6);
     sendData(battVolt, 7);
     delay(3000); // Otherwise disconnecting too fast and sending won't go through (!) //TODO: decrement
 
 
-    SerialMon.println("Disconnecting from Blynk...");
+    DEBUG_PRINTLN("Disconnecting from Blynk...");
     Blynk.disconnect();
   }
 
   // Put ESP32 into deep sleep mode (with timer wake up)
-  SerialMon.println("Going back to sleep...");
+  DEBUG_PRINTLN("Going back to sleep...");
   esp_deep_sleep_start();
 }
 
@@ -244,21 +259,21 @@ float calcPercentage(float distance, float mountingHeight, float roundingMultipl
 
 // Get n samples of distance in cm
 void calcDistanceVals(int echoCount, int pauseMeasurement){
-  SerialMon.println("Getting measurements...");
+  DEBUG_PRINTLN("Getting measurements...");
   float distance;
   int errorCount;
   for (int i = 0; i < echoCount;){
       distance = distanceSensor.measureDistanceCm();
       if (distance != -1){
           distanceVals[i] = distance;
-          Serial.println(distance);
+          DEBUG_PRINTLN(distance);
           i++;
       }
       else{
-        SerialMon.println("CANNOT GET MEASUREMENT");
+        DEBUG_PRINTLN("CANNOT GET MEASUREMENT");
         errorCount++;
         if (errorCount > 10 ){  //TODO: THINK OF BETTER SOLUTION IN PRODUCTION
-          SerialMon.println("Going back to sleep...");
+          DEBUG_PRINTLN("Going back to sleep...");
           TIME_TO_SLEEP /= 2;
           esp_deep_sleep_start();
         }
@@ -272,25 +287,25 @@ void calcDistanceVals(int echoCount, int pauseMeasurement){
 void calcDistance(float* distanceVals){
     int dValsLength = sizeof(distanceVals) / sizeof(distanceVals[0]); 
     distance = QuickMedian<float>::GetMedian(distanceVals, dValsLength);                
-    SerialMon.print("MEDIAN: ");
-    SerialMon.println(distance);
+    DEBUG_PRINT("MEDIAN: ");
+    DEBUG_PRINTLN(distance);
 }
 
 // Print filllevel if in valid range
 void printLevel(int fillLevel){
   if (fillLevel <= 0 || fillLevel > 100){
-      SerialMon.print("ERROR! percent value too big/small");
+      DEBUG_PRINTLN("ERROR! percent value too big/small");
       return;
   }
-  SerialMon.print("%: ");
-  SerialMon.println(fillLevel);
+  DEBUG_PRINT("%: ");
+  DEBUG_PRINTLN(fillLevel);
 }
 
 // Send rounded filllevel to Blynk server (write to "virtual pin")
 void sendData(int data, int VPin){
   Blynk.virtualWrite(VPin, data);
   String tmp = String(data);
-  SerialMon.println("Sent " + tmp + " to Blynk!");
+  DEBUG_PRINTLN("Sent " + tmp + " to Blynk!");
 }
 
 // Test modems connection to GPRS with n retries, restart modem,
@@ -298,24 +313,24 @@ void sendData(int data, int VPin){
 bool testModemConnection(TinyGsm modem, int connectionRetries, const char* apn, const char* gprsUser, const char* gprsPass){
   delay(500);
   if (!modem.isGprsConnected()){
-    SerialMon.println("Modem couldn't connect...");
+    DEBUG_PRINTLN("Modem couldn't connect...");
     for (int j = 0; j < connectionRetries; j++){
-      SerialMon.println("Retrying...");
+      DEBUG_PRINTLN("Retrying...");
       delay(2000);
       if (j%2 == 0){
-        SerialMon.println("Restarting modem...");
+        DEBUG_PRINTLN("Restarting modem...");
         modem.restart();
         modem.gprsConnect(apn, gprsUser, gprsPass);
         delay(5000);
       }
       if (modem.isGprsConnected()){
-        SerialMon.println("Modem connected!");
+        DEBUG_PRINTLN("Modem connected!");
         return true;
       }
     }
   }
   else{
-    SerialMon.println("Modem connected!");
+    DEBUG_PRINTLN("Modem connected!");
     return true;
   }
   return false;
