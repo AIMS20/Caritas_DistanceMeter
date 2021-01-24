@@ -32,9 +32,10 @@ char auth[] = "OIYHUu6ibNNhhu7l9bGg36XXuTbW0OAz";
 const int SR04_triggerpin = 18;   // MISO pin
 const int SR04_echopin    = 19;   // SCL pin
 
+// defines the time to deepsleep between main routine
 // Factors in UNSIGNED LONG (!)
 #define uS_TO_S_FACTOR 1000000UL  // Conversion factor for micro seconds to seconds 
-int TIME_TO_SLEEP = 3600UL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
+int TIME_TO_SLEEP = 1800UL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
 
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
 #define BLYNK_DEBUG BlynkSerial // Optional, this enables more detailed prints
@@ -97,7 +98,7 @@ bool isConnected;
 bool blynkConnected;
 
 // Vars of container and sensor
-const float mountingHeight = 73;   //in cm //TODO: Adjust after exact measuring in MIDDLE of Container (in Maya)
+const float mountingHeight = 80;   //in cm //TODO: Adjust after exact measuring in MIDDLE of Container (in Maya)
 const int echoCount = 15;           //how often measurement will be taken before going back to sleep
 const int pauseMeasurement = 300;  //in miliseconds
 float distanceVals[echoCount];      //in cm
@@ -210,7 +211,7 @@ void loop() {
   calcDistanceVals(echoCount, pauseMeasurement);
 
   //calculate median of distancevals
-  calcDistance(distanceVals);
+  calcDistance(echoCount, distanceVals);
 
   //calculate fill-percentage depending on mounting-height of sensor (!)
   calcPercentage(distance, mountingHeight, roundingMultiple);
@@ -254,7 +255,14 @@ float calcPercentage(float distance, float mountingHeight, float roundingMultipl
   float percent = (fillHeight / mountingHeight * 100);
   float result = percent + roundingMultiple/2;
   result -= (int(result)) % (int(roundingMultiple));
-  fillLevel = result;
+
+  // Set to -1 if out of range
+  if (result <= 0 || result > 100){
+    fillLevel = -1;
+  }
+  else{
+    fillLevel = result;
+  }
 }
 
 // Get n samples of distance in cm
@@ -277,16 +285,14 @@ void calcDistanceVals(int echoCount, int pauseMeasurement){
           TIME_TO_SLEEP /= 2;
           esp_deep_sleep_start();
         }
-        
       }
       delay(pauseMeasurement);
   }
 }
 
 // Get median of n samples of distance-values
-void calcDistance(float* distanceVals){
-    int dValsLength = sizeof(distanceVals) / sizeof(distanceVals[0]); 
-    distance = QuickMedian<float>::GetMedian(distanceVals, dValsLength);                
+void calcDistance(int echoCount, float distanceVals[]){
+    distance = QuickMedian<float>::GetMedian(distanceVals, echoCount);                
     DEBUG_PRINT("MEDIAN: ");
     DEBUG_PRINTLN(distance);
 }
