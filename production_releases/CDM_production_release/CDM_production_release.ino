@@ -35,14 +35,14 @@ const int SR04_echopin    = 19;   // SCL pin
 // defines the time to deepsleep between main routine
 // Factors in UNSIGNED LONG (!)
 #define uS_TO_S_FACTOR 1000000UL  // Conversion factor for micro seconds to seconds 
-int TIME_TO_SLEEP = 1800UL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
+int TIME_TO_SLEEP = 10UL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
 
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
 #define BLYNK_DEBUG BlynkSerial // Optional, this enables more detailed prints
 // Set serial for debug console (to Serial Monitor, default speed 115200)
 
 //UNCOMMENT FOR DEBUG PRINTS
-// #define SERIAL_DEBUG Serial
+#define SERIAL_DEBUG Serial
 
 // #define SerialMon Serial
 
@@ -99,12 +99,12 @@ bool blynkConnected;
 
 // Vars of container and sensor
 const float mountingHeight = 80;   //in cm //TODO: Adjust after exact measuring in MIDDLE of Container (in Maya)
-const int echoCount = 15;           //how often measurement will be taken before going back to sleep
-const int pauseMeasurement = 300;  //in miliseconds
+const int echoCount = 25;           //how often measurement will be taken before going back to sleep
+const int pauseMeasurement = 200;  //in miliseconds; keep relatively high as low pause gives wrong values
 float distanceVals[echoCount];      //in cm
 float distance;                     //in cm
 int fillLevel;                      //in percent
-float roundingMultiple = 5;
+float roundingMultiple = 2;
 
 // Vars of modem
 const int connectionRetries = 2;
@@ -249,19 +249,19 @@ bool setPowerBoostKeepOn(int en){
   return I2CPower.endTransmission() == 0;
 }
 
-// Calculate percentage of filllevel depending on mounting-height (!), round to nearest multiple of 5
+// Calculate percentage of filllevel depending on mounting-height (!), round to nearest multiple of n
 float calcPercentage(float distance, float mountingHeight, float roundingMultiple){
   float fillHeight = (mountingHeight-distance);
   float percent = (fillHeight / mountingHeight * 100);
   float result = percent + roundingMultiple/2;
-  result -= (int(result)) % (int(roundingMultiple));
+  result -= fmod(result, roundingMultiple);
 
   // Set to -1 if out of range
-  if (result <= 0 || result > 100){
-    fillLevel = -1;
+  if (result < 0 || result > 100){
+    fillLevel = -1; //TODO: Back to sleep?
   }
   else{
-    fillLevel = result;
+    fillLevel = int(result);
   }
 }
 
@@ -292,15 +292,24 @@ void calcDistanceVals(int echoCount, int pauseMeasurement){
 
 // Get median of n samples of distance-values
 void calcDistance(int echoCount, float distanceVals[]){
-    distance = QuickMedian<float>::GetMedian(distanceVals, echoCount);                
+    distance = QuickMedian<float>::GetMedian(distanceVals, echoCount);     
+    for (int i = 0; i < echoCount; i++)
+    {
+      DEBUG_PRINT("INDEX ");
+      DEBUG_PRINT(i);
+      DEBUG_PRINT(": ");
+      DEBUG_PRINTLN(distanceVals[i]);
+    }
+               
     DEBUG_PRINT("MEDIAN: ");
     DEBUG_PRINTLN(distance);
 }
 
 // Print filllevel if in valid range
 void printLevel(int fillLevel){
-  if (fillLevel <= 0 || fillLevel > 100){
-      DEBUG_PRINTLN("ERROR! percent value too big/small");
+  if (fillLevel < 0 || fillLevel > 100){
+      DEBUG_PRINTLN("ERROR! percent value too big/small:");
+      DEBUG_PRINTLN(fillLevel);
       return;
   }
   DEBUG_PRINT("%: ");
@@ -322,12 +331,12 @@ bool testModemConnection(TinyGsm modem, int connectionRetries, const char* apn, 
     DEBUG_PRINTLN("Modem couldn't connect...");
     for (int j = 0; j < connectionRetries; j++){
       DEBUG_PRINTLN("Retrying...");
-      delay(2000);
+      delay(1000);
       if (j%2 == 0){
         DEBUG_PRINTLN("Restarting modem...");
         modem.restart();
         modem.gprsConnect(apn, gprsUser, gprsPass);
-        delay(5000);
+        delay(2500);
       }
       if (modem.isGprsConnected()){
         DEBUG_PRINTLN("Modem connected!");
