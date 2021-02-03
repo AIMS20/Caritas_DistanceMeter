@@ -42,7 +42,7 @@ uint TIME_TO_SLEEP = 18000UL;        // Time ESP32 will go to sleep (in seconds)
 // Set serial for debug console (to Serial Monitor, default speed 115200)
 
 //UNCOMMENT FOR DEBUG PRINTS
-#define SERIAL_DEBUG Serial
+// #define SERIAL_DEBUG Serial
 
 // #define SerialMon Serial
 
