@@ -35,7 +35,7 @@ const int SR04_echopin    = 19;   // SCL pin
 // defines the time to deepsleep between main routine
 // Factors in UNSIGNED LONG (!)
 #define uS_TO_S_FACTOR 1000000UL  // Conversion factor for micro seconds to seconds 
-int TIME_TO_SLEEP = 10UL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
+uint TIME_TO_SLEEP = 18000UL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
 
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
 #define BLYNK_DEBUG BlynkSerial // Optional, this enables more detailed prints
@@ -98,8 +98,8 @@ bool isConnected;
 bool blynkConnected;
 
 // Vars of container and sensor
-const float mountingHeight = 80;   //in cm //TODO: Adjust after exact measuring in MIDDLE of Container (in Maya)
-const int echoCount = 25;           //how often measurement will be taken before going back to sleep
+const float mountingHeight = 170;   //in cm //TODO: Adjust after exact measuring to the MIDDLE of Container (in 3D Model)
+const int echoCount = 20;           //how often measurement will be taken before going back to sleep
 const int pauseMeasurement = 200;  //in miliseconds; keep relatively high as low pause gives wrong values
 float distanceVals[echoCount];      //in cm
 float distance;                     //in cm
@@ -173,23 +173,24 @@ void setup() {
         esp_deep_sleep_start();
       }
     }
-    else { // If GPRS connection successful, test for Blynk connection, if not possible: deepsleep
-      DEBUG_PRINTLN("Connecting to Blynk...");
-      Blynk.config(modem, auth);
-      blynkConnected = Blynk.connect(15000); // Timeout in ms
 
-      // If Blynk connection successful, begin. If not: deepsleep
-      if (blynkConnected == 1){
-        DEBUG_PRINTLN("Connected to Blynk!");
-        DEBUG_PRINTLN("Starting up Blynk...");
-        Blynk.begin(auth, modem, apn, gprsUser, gprsPass);
-      }
-      else{
-        DEBUG_PRINTLN("Can't connect to Blynk. Back to deepsleep.");
-        TIME_TO_SLEEP /= 2;
-        esp_deep_sleep_start();
-      }
+    // If GPRS connection successful, test for Blynk connection, if not possible: deepsleep
+    DEBUG_PRINTLN("Connecting to Blynk...");
+    Blynk.config(modem, auth);
+    blynkConnected = Blynk.connect(15000); // Timeout in ms
+
+    // If Blynk connection successful, begin. If not: deepsleep
+    if (blynkConnected == 1){
+      DEBUG_PRINTLN("Connected to Blynk!");
+      DEBUG_PRINTLN("Starting up Blynk...");
+      Blynk.begin(auth, modem, apn, gprsUser, gprsPass);
     }
+    else{
+      DEBUG_PRINTLN("Can't connect to Blynk. Back to deepsleep.");
+      TIME_TO_SLEEP /= 2;
+      esp_deep_sleep_start();
+    }
+  
   }
 
   battPercent = modem.getBattPercent();
@@ -225,7 +226,7 @@ void loop() {
     sendData(fillLevel, 5);
     sendData(battPercent, 6);
     sendData(battVolt, 7);
-    delay(3000); // Otherwise disconnecting too fast and sending won't go through (!) //TODO: decrement
+    delay(2000); // Otherwise disconnecting too fast and sending won't go through (!) //TODO: decrement
 
 
     DEBUG_PRINTLN("Disconnecting from Blynk...");
