@@ -34,8 +34,8 @@ const int SR04_echopin    = 19;   // SCL pin
 
 // defines the time to deepsleep between main routine
 // Factors in UNSIGNED LONG (!)
-#define uS_TO_S_FACTOR 1000000UL  // Conversion factor for micro seconds to seconds 
-uint TIME_TO_SLEEP = 18000UL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
+#define uS_TO_S_FACTOR 1000000ULL  // Conversion factor for micro seconds to seconds 
+uint TIME_TO_SLEEP = 18000ULL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
 
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
 #define BLYNK_DEBUG BlynkSerial // Optional, this enables more detailed prints
