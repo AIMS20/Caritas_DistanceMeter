@@ -42,7 +42,7 @@ uint TIME_TO_SLEEP = 18000ULL;        // Time ESP32 will go to sleep (in seconds
 // Set serial for debug console (to Serial Monitor, default speed 115200)
 
 //UNCOMMENT FOR DEBUG PRINTS
-// #define SERIAL_DEBUG Serial
+#define SERIAL_DEBUG Serial
 
 // #define SerialMon Serial
 
@@ -98,7 +98,7 @@ bool isConnected;
 bool blynkConnected;
 
 // Vars of container and sensor
-const float mountingHeight = 170;   //in cm //TODO: Adjust after exact measuring to the MIDDLE of Container (in 3D Model)
+const float mountingHeight = 170;   //in cm 
 const int echoCount = 20;           //how often measurement will be taken before going back to sleep
 const int pauseMeasurement = 200;  //in miliseconds; keep relatively high as low pause gives wrong values
 float distanceVals[echoCount];      //in cm
@@ -113,8 +113,8 @@ float battVolt;
 
 
 void setup() { 
-// Hibernate instead of deepsleep
-  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);  
+  // Hibernate instead of deepsleep
+  // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);  
 
   // Set serial monitor debugging window baud rate to 9600 (default 115200)
   Serial.begin(9600);
@@ -133,7 +133,7 @@ void setup() {
   pinMode(SR04_triggerpin, OUTPUT);
   pinMode(SR04_echopin, INPUT);
 
-  // Keep power when running from battery //TODO: check if deepsleep reboot on battery works without this
+  // Keep power when running from battery //TODO: check if i can optimize this
   bool isOk = setPowerBoostKeepOn(1);
   DEBUG_PRINTLN(String("IP5306 KeepOn ") + (isOk ? "OK" : "FAIL")); 
 
@@ -193,6 +193,13 @@ void setup() {
   
   }
 
+}
+
+// Every n miliseconds, do a measurement using the sensor,
+// print the distance in centimeters and send the fillLevel
+void loop() {
+  DEBUG_PRINTLN("Starting loop...");
+
   battPercent = modem.getBattPercent();
   battVolt = modem.getBattVoltage();
 
@@ -200,13 +207,6 @@ void setup() {
   DEBUG_PRINTLN(battPercent);
   DEBUG_PRINTLN("Battery V: ");
   DEBUG_PRINTLN(battVolt);
-
-}
-
-// Every n miliseconds, do a measurement using the sensor,
-// print the distance in centimeters and send the fillLevel
-void loop() {
-  DEBUG_PRINTLN("Starting loop...");
 
   //get array of multiple distance-levels to calc median afterwards: prunes out false readings 
   calcDistanceVals(echoCount, pauseMeasurement);
