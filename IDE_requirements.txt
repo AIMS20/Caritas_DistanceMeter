@@ -1,9 +1,10 @@
 FÜR TTGO LORA
 
-Boards Manager -> 	"esp32" von espressif
-Libraries -> 		"ssd1306" von Adafruit
-					"gfx" von Adafruit
-					"LoRa" von Sandeep Mistry
+Boards Manager -> 	"esp32" from espressif
+Libraries -> 		"ssd1306" from Adafruit
+					"gfx" from Adafruit
+					"LoRa" from Sandeep Mistry
+
 
 
 
@@ -13,12 +14,20 @@ https://randomnerdtutorials.com/ttgo-lora32-sx1276-arduino-ide/
 
 FÜR TTGO GSM
 
-Boards Manager ->	"esp32" von espressif
-Libraries ->		"TinyGSM" von vshymanskyy
-					"blynkkk" von vshymanskyy
-					"Wire" von Arduino
-					"QuickMedianLib" von Luis LLamas
-
+Boards Manager ->	"esp32" from espressif
+Libraries ->		"TinyGSM" from vshymanskyy
+					"blynk-library" from blynkkk
+					"Wire" from Arduino
+					"QuickMedianLib" from Luis LLamas
+					"esp_sleep" from espressif
+					"WiFi" from espressif
+					"esp_bt" from espressif
+					"esp_wifi" from espressif
+					"Wire" from Arduino
+					"HCSR04" from Martin Sosic
+					"QuickMedianLib" from Luis Llamas
+					
+				
 
 
 Benützte Links:
