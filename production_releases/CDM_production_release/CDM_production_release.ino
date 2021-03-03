@@ -124,7 +124,11 @@ void setup() {
   WiFi.disconnect();            //disable Wifi
   esp_bt_controller_disable();  //disable Bluetooth
   adc_power_off();              //disable analog-dig-converter
-  setCpuFrequencyMhz(10);       //set cpu frequency to lowest 
+  setCpuFrequencyMhz(10);       //set cpu frequency to lowest - NEEDS TO BE CONFIGURED IN IDE
+
+  int freq = getCpuFrequencyMhz();
+  DEBUG_PRINTLN("CPUFreq: ");
+  DEBUG_PRINTLN(freq);
 
   // Start I2C communication
   I2CPower.begin(I2C_SDA, I2C_SCL, 400000);
