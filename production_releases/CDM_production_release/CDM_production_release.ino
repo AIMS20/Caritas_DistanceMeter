@@ -31,6 +31,7 @@ char auth[] = "OIYHUu6ibNNhhu7l9bGg36XXuTbW0OAz";
 // SR04 pins
 const int SR04_triggerpin = 18;   // MISO pin
 const int SR04_echopin    = 19;   // SCL pin
+const int SR04_power      = 33;   // HCSR-04 power pin
 
 // defines the time to deepsleep between main routine
 // Factors in UNSIGNED LONG (!)
@@ -136,6 +137,7 @@ void setup() {
   // Set SR04 pins
   pinMode(SR04_triggerpin, OUTPUT);
   pinMode(SR04_echopin, INPUT);
+  pinMode(SR04_power, OUTPUT);
 
   // Keep power when running from battery //TODO: check if i can optimize this
   bool isOk = setPowerBoostKeepOn(1);
@@ -212,8 +214,14 @@ void loop() {
   DEBUG_PRINTLN("Battery V: ");
   DEBUG_PRINTLN(battVolt);
 
+  //power on HCSR-04
+  digitalWrite(SR04_power, HIGH);
+
   //get array of multiple distance-levels to calc median afterwards: prunes out false readings 
   calcDistanceVals(echoCount, pauseMeasurement);
+
+  //power off HCSR-04
+  digitalWrite(SR04_power, LOW);
 
   //calculate median of distancevals
   calcDistance(echoCount, distanceVals);
