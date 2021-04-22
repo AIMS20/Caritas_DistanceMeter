@@ -339,6 +339,7 @@ void sendData(int data, int VPin){
   DEBUG_PRINTLN("Sent " + tmp + " to Blynk!");
 }
 
+//TODO: refactor
 // Test modems connection to GPRS with n retries, restart modem,
 // go back to deepsleep if no connection can be established
 bool testModemConnection(TinyGsm modem, int connectionRetries, const char* apn, const char* gprsUser, const char* gprsPass){
