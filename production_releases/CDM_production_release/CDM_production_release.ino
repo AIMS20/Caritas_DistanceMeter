@@ -35,7 +35,7 @@ const int SR04_power      = 33;   // HCSR-04 power pin
 
 // defines the time to deepsleep between main routine
 // Factors in UNSIGNED LONG (!)
-#define uS_TO_S_FACTOR 1000000ULL  // Conversion factor for micro seconds to seconds 
+#define uS_TO_S_FACTOR 1000000ULL     // Conversion factor for micro seconds to seconds 
 uint TIME_TO_SLEEP = 18000ULL;        // Time ESP32 will go to sleep (in seconds) 3600 seconds = 1 hour
 
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
@@ -43,7 +43,7 @@ uint TIME_TO_SLEEP = 18000ULL;        // Time ESP32 will go to sleep (in seconds
 // Set serial for debug console (to Serial Monitor, default speed 115200)
 
 //UNCOMMENT FOR DEBUG PRINTS
-#define SERIAL_DEBUG Serial
+//#define SERIAL_DEBUG Serial
 
 // #define SerialMon Serial
 
@@ -99,7 +99,7 @@ bool isConnected;
 bool blynkConnected;
 
 // Vars of container and sensor
-const float mountingHeight = 170;   //in cm 
+const float mountingHeight = 130;   //in cm 
 const int echoCount = 20;           //how often measurement will be taken before going back to sleep
 const int pauseMeasurement = 200;  //in miliseconds; keep relatively high as low pause gives wrong values
 float distanceVals[echoCount];      //in cm
@@ -273,6 +273,9 @@ float calcPercentage(float distance, float mountingHeight, float roundingMultipl
   if (result < 0 || result > 100){
     fillLevel = -1; //TODO: Back to sleep?
   }
+  else if((result > 70) && (result < 100)){ //"feels/looks" like 100% in container
+    fillLevel = 100;
+  }
   else{
     fillLevel = int(result);
   }
@@ -363,4 +366,3 @@ bool testModemConnection(TinyGsm modem, int connectionRetries, const char* apn, 
   }
   return false;
 }
-
