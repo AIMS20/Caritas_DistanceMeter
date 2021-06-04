@@ -3,7 +3,8 @@
 //TODO: Optimize measurements for minimal Error-readings
 //TODO: Advanced Power management by
         -deactivating PINS
-        -...
+        -Integrate new Blynk Dashboard
+        ...
 */
 
 // GPRS credentials (leave empty, if not needed)
@@ -14,10 +15,6 @@ const char gprsPass[] = ""; // GPRS Password
 
 // SIM card PIN (leave empty, if not defined)
 const char simPIN[]   = ""; 
-
-// Blynk Server details //TODO: Remove //FOR TESTING PURPOSES, WILL NOT WORK IN PRODUCTION ENVIRONMENT
-// "WIFI MAnager esp32" or EEPROM ()
-char auth[] = "OIYHUu6ibNNhhu7l9bGg36XXuTbW0OAz";
 
 // TTGO T-Call pins
 #define MODEM_RST            5
@@ -40,7 +37,13 @@ uint TIME_TO_SLEEP = 18000ULL;        // Time ESP32 will go to sleep (in seconds
 
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
 #define BLYNK_DEBUG BlynkSerial // Optional, this enables more detailed prints
+#define BLYNK_TEMPLATE_ID "TMPLF62HGD7i"
+#define BLYNK_DEVICE_NAME "CaritasDM"
 // Set serial for debug console (to Serial Monitor, default speed 115200)
+
+// Blynk Server details //TODO: Remove //FOR TESTING PURPOSES, WILL NOT WORK IN PRODUCTION ENVIRONMENT
+// "WIFI MAnager esp32" or EEPROM ()
+char auth[] = "OIYHUu6ibNNhhu7l9bGg36XXuTbW0OAz";
 
 //UNCOMMENT FOR DEBUG PRINTS
 //#define SERIAL_DEBUG Serial
