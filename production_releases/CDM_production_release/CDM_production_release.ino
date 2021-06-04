@@ -4,7 +4,7 @@
 //TODO: Advanced Power management by
         -deactivating PINS
         -Integrate new Blynk Dashboard
-        ...
+        -Domhardt; Uni-Plan for Blynk-Pro/Business?
 */
 
 // GPRS credentials (leave empty, if not needed)
