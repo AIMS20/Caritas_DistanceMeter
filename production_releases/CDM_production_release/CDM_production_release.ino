@@ -43,7 +43,7 @@ uint TIME_TO_SLEEP = 18000ULL;        // Time ESP32 will go to sleep (in seconds
 
 // Blynk Server details //TODO: Remove //FOR TESTING PURPOSES, WILL NOT WORK IN PRODUCTION ENVIRONMENT
 // "WIFI MAnager esp32" or EEPROM ()
-char auth[] = "OIYHUu6ibNNhhu7l9bGg36XXuTbW0OAz";
+char auth[] = "2VKSnHFO7FI_WT8yw9HBy7gNo_JYpM60";
 
 //UNCOMMENT FOR DEBUG PRINTS
 //#define SERIAL_DEBUG Serial
