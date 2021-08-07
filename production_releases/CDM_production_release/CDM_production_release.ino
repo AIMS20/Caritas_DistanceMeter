@@ -1,6 +1,7 @@
 
 /*
 //TODO: Optimize measurements for minimal Error-readings
+//TODO: add further min/max-thresholds 
 //TODO: Advanced Power management by
         -deactivating PINS
         -...
