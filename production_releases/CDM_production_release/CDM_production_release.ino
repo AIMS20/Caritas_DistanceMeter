@@ -37,13 +37,13 @@ uint TIME_TO_SLEEP = 18000ULL;        // Time ESP32 will go to sleep (in seconds
 
 // #define BLYNK_PRINT Serial   // Defines the object that is used for printing
 #define BLYNK_DEBUG BlynkSerial // Optional, this enables more detailed prints
-#define BLYNK_TEMPLATE_ID "TMPLF62HGD7i"
-#define BLYNK_DEVICE_NAME "CaritasDM"
+#define BLYNK_TEMPLATE_ID "TMPLfS8p5LEf"
+#define BLYNK_DEVICE_NAME "Container 1 LZ"
 // Set serial for debug console (to Serial Monitor, default speed 115200)
 
 // Blynk Server details //TODO: Remove //FOR TESTING PURPOSES, WILL NOT WORK IN PRODUCTION ENVIRONMENT
 // "WIFI MAnager esp32" or EEPROM ()
-char auth[] = "2VKSnHFO7FI_WT8yw9HBy7gNo_JYpM60";
+char auth[] = "-P-1Ti-zq8ZnJpCHb6bjByaiRnGYHLsP";
 
 //UNCOMMENT FOR DEBUG PRINTS
 //#define SERIAL_DEBUG Serial
